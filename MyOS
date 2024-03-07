@@ -1,0 +1,28 @@
+nasm -o build/mbr -I ./boot/include/ boot/mbr.S
+dd if=build/mbr of=/home/lxc_990131/桌面/bochs/hd60M.img bs=512 count=1 conv=notrunc
+
+nasm -o build/loader -I ./boot/include/ ./boot/loader.S
+dd if=build/loader of=/home/lxc_990131/桌面/bochs/hd60M.img bs=512 count=4 conv=notrunc seek=2
+
+gcc-4.4 -I lib/kernel/ -I lib/ -I kernel/ -c -fno-builtin -o build/main.o -m32 kernel/main.c
+
+nasm -f elf -o build/print.o lib/kernel/print.S
+
+nasm -f elf -o build/kernel.o kernel/kernel.S
+
+gcc-4.4 -I lib/kernel/ -I lib/ -I kernel/ -c -fno-builtin -o build/interrput.o -m32 kernel/interrupt.c
+
+gcc-4.4 -m32 -I lib/kernel/ -I lib/ -I kernel/ -c -fno-builtin -o build/init.o kernel/init.c
+
+ld -m elf_i386 -Ttext 0x00001500 -e main -o build/kernel.bin  build/main.o build/kernel.o build/init.o build/interrput.o build/print.o
+
+dd if=build/kernel.bin of=/home/lxc_990131/桌面/bochs/hd60M.img bs=512 count=200 seek=9 conv=notrunc
+
+cd bochs-gdb
+
+bin/bochs -f bochsrc.disk
+
+新终端 gdb
+target remote localhost:1234
+
+symbol-file /home/lxc_990131/桌面/MyOS/build/kernel.sym
