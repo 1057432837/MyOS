@@ -1,6 +1,6 @@
 BUILD_DIR = ./build
 ENTRY_POINT = 0xc0001500
-HD60M_PATH = /home/lxc_990131/桌面/bochs-gdb/hd60M.img
+HD60M_PATH = /home/lxc_990131/桌面/bochs/hd60M.img
 AS = nasm
 CC = gcc-4.4
 LD = ld
