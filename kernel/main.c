@@ -5,38 +5,25 @@
 #include "global.h"
 #include "../lib/kernel/bitmap.h"
 #include "memory.h"
+#include "../thread/thread.h"
+
+void k_thread_a(void*);
 
 int main(void) {
-   // int i;
-   // struct bitmap btm;
-   // struct bitmap* bitmap = &btm;
-   // uint8_t test_map[2];
-   // bitmap -> btmp_bytes_len = sizeof(test_map);
-   // bitmap -> bits = test_map;
-   // bitmap_init(bitmap);
-
-   // for(i = 0; i < 4; i++){  
-   //    bitmap_set(bitmap, i, 1);
-   // }
-   // bitmap_set(bitmap, 6, 1);
-   // bitmap_set(bitmap, 7, 1);
-   // bitmap_set(bitmap, 11, 1);
-   // put_char('\n');
-   // for(i = 0; i < 16; i++){
-   //    put_int(bitmap_scan_test(bitmap, i));
-   // }
-   // put_char('\n');
-   // put_int(bitmap_scan(bitmap, 4));
-   // put_char('\n');
-   // put_int(bitmap_scan(bitmap, 5));
    put_str("I am kernel\n");
    init_all();
 
-   void* addr = get_kernel_pages(3);
-   put_str("\n get_kernel_page start vaddr is ");
-   put_int((uint32_t)addr);
-   put_str("\n");
+   thread_start("k_thread_a", 31, k_thread_a, "argA ");
 
    while(1);
    return 0;
+}
+
+void k_thread_a(void* arg) {     
+   char* para = arg;
+   while(1) {
+      int i = 9999999;
+      while(i--);
+      put_str(para);
+   }
 }

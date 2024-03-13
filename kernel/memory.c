@@ -2,6 +2,7 @@
 #include "stdint.h"
 #include "print.h"
 #include "debug.h"
+#include "string.h"
 
 #define PG_SIZE 4096
 #define MEM_BITMAP_BASE 0xc009a000
@@ -107,39 +108,40 @@ static void* palloc(struct pool* m_pool) {
 }
 
 uint32_t* pde_ptr(uint32_t vaddr) {
-	uint32_t pde = (uint32_t*)((0xfffff000) + PDE_IDX(vaddr) * 4);
+	uint32_t* pde = (uint32_t*)((0xfffff000) + PDE_IDX(vaddr) * 4);
 	return pde;
 }
 
 uint32_t* pte_ptr(uint32_t vaddr) {
-	uint32_t pte = (uint32_t*)(0xffc00000 + ((vaddr & 0xffc00000) >> 10) + PTE_IDX(vaddr) * 4);
+	uint32_t* pte = (uint32_t*)(0xffc00000 + ((vaddr & 0xffc00000) >> 10) + PTE_IDX(vaddr) * 4);
 	return pte;
 }
 
 static void page_table_add(void* _vaddr, void* _page_phyaddr) {
-	uint32_t vaddr = (uint32_t)_vaddr, page_phyaddr = (uint32_t)_page_phyaddr;
-	uint32_t* pde = pde_ptr(vaddr);
-	uint32_t* pte = pte_ptr(vaddr);
+   	uint32_t vaddr = (uint32_t)_vaddr, page_phyaddr = (uint32_t)_page_phyaddr;
+   	uint32_t* pde = pde_ptr(vaddr);
+   	uint32_t* pte = pte_ptr(vaddr);
 
-	if(*pde & 0x00000001) {
-		ASSERT(!(*pte & 0x00000001));
+   	if (*pde & 0x00000001) {
+      	ASSERT(!(*pte & 0x00000001));
 
-		if(!(*pte & 0x00000001)) {
-			*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
-		}else {
-			PANIC("pte repeat");
-			// *pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
-		}
-	}else {
-		uint32_t pde_phyaddr = (uint32_t)palloc(&kernel_pool);
+    	if (!(*pte & 0x00000001)) {
+	 		*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+      	} 
+		else {
+	 		PANIC("pte repeat");
+	 		*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+     	}
+   	} 
+	else {
+      	uint32_t pde_phyaddr = (uint32_t)palloc(&kernel_pool);
 
-		*pde = (pde_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+      	*pde = (pde_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
 
-		memset((void*)((int)pte & 0xfffff000), 0, PG_SIZE);
-
-		ASSERT(!(*pte & 0x00000001));
-		*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
-	}
+      	memset((void*)((int)pte & 0xfffff000), 0, PG_SIZE);
+      	ASSERT(!(*pte & 0x00000001));
+      	*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+   	}
 }
 
 void* malloc_page(enum pool_flags pf, uint32_t pg_cnt) {
