@@ -67,9 +67,23 @@ static void general_intr_handler(uint8_t vec_nr) {
 	if(vec_nr == 0x27 || vec_nr == 0x2f) {
 		return;
 	}
-	put_str("int vector: 0x");
-	put_int(vec_nr);
-	put_char('\n');
+	set_cursor(0);
+	int cursor_pos = 0;
+	while(cursor_pos < 320) {
+		put_char(' ');
+		cursor_pos++;
+	}
+	set_cursor(0);
+	put_str("!!!!!			excetion message begin			!!!!!\n");
+	set_cursor(88);
+	put_str(intr_name[vec_nr]);
+	if(vec_nr == 14) {
+		int page_fault_vaddr = 0;
+		asm("mov %%cr2, %0" : "=r" (page_fault_vaddr));
+		put_str("\n page fault addr is ");put_int(page_fault_vaddr);
+	}
+	put_str("!!!!!			excetion message end			!!!!!\n");
+	while(1);
 }
 
 static void exception_init(void) {
@@ -142,4 +156,8 @@ enum intr_status intr_disable() {
 
 enum intr_status intr_set_status(enum intr_status status) {
 	return status & INTR_ON ? intr_enable() : intr_disable();
+}
+
+void register_handler(uint8_t vector_no, intr_handler function) {
+	idt_table[vector_no] = function;
 }

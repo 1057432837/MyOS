@@ -11,4 +11,5 @@ enum intr_status {
 	INTR_OFF,
 	INTR_ON
 };
+void register_handler(uint8_t vector_no, intr_handler function);
 #endif
