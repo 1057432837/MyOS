@@ -1,10 +1,5 @@
-#include "../lib/kernel/print.h"
+#include "print.h"
 #include "init.h"
-#include "debug.h"
-#include "../lib/string.h"
-#include "global.h"
-#include "../lib/kernel/bitmap.h"
-#include "memory.h"
 #include "../thread/thread.h"
 #include "interrupt.h"
 
