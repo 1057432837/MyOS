@@ -19,6 +19,10 @@ intr%1entry:
     push fs
     push gs
     pushad
+
+	mov al, 0x20
+	out 0xa0, al
+	out 0x20, al
     
     push %1
     call [idt_table + %1 * 4]
@@ -40,10 +44,6 @@ intr_exit:
 	pop es
 	pop ds
 	add esp, 4
-	
-	mov al, 0x20
-	out 0xa0, al
-	out 0x20, al
 	
 	iretd
 
